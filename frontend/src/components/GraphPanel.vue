@@ -2,7 +2,7 @@
   <div class="graph-panel">
     <div class="panel-header">
       <span class="panel-title">Graph Relationship Visualization</span>
-      <!-- 顶部Toolbar (Internal Top Right) -->
+      <!-- Top Toolbar (Internal Top Right) -->
       <div class="header-tools">
         <button class="tool-btn" @click="$emit('refresh')" :disabled="loading" title="RefreshGraph">
           <span class="icon-refresh" :class="{ 'spinning': loading }">↻</span>
