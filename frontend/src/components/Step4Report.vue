@@ -561,7 +561,7 @@ const parseInsightForge = (text) => {
     
     // Extract statistical data - match "related prediction facts: X entries" format
     const factMatch = text.match(/相关预测事实:\s*(\d+)/)
-    const entityMatch = text.match(/涉及实体:\s*(\d+)/)
+    const entityMatch = text.match(/涉及Entity:\s*(\d+)/)
     const relMatch = text.match(/Relationship链:\s*(\d+)/)
     if (factMatch) result.stats.facts = parseInt(factMatch[1])
     if (entityMatch) result.stats.entities = parseInt(entityMatch[1])
@@ -585,7 +585,7 @@ const parseInsightForge = (text) => {
     }
     
     // Extract core entities - extract all, including summary and related facts count
-    const entitySection = text.match(/### 【核心实体】\n([\s\S]*?)(?=\n###|$)/)
+    const entitySection = text.match(/### 【核心Entity】\n([\s\S]*?)(?=\n###|$)/)
     if (entitySection) {
       const entityText = entitySection[1]
       // Split entity blocks by "- **"
@@ -633,7 +633,7 @@ const parsePanorama = (text) => {
   
   try {
     // Extract query
-    const queryMatch = text.match(/查询:\s*(.+?)(?:\n|$)/)
+    const queryMatch = text.match(/Query:\s*(.+?)(?:\n|$)/)
     if (queryMatch) result.query = queryMatch[1].trim()
     
     // Extract statistical data
@@ -668,7 +668,7 @@ const parsePanorama = (text) => {
     }
     
     // Extract involved entities - extract all, no limit
-    const entitySection = text.match(/### 【涉及实体】\n([\s\S]*?)(?=\n###|$)/)
+    const entitySection = text.match(/### 【涉及Entity】\n([\s\S]*?)(?=\n###|$)/)
     if (entitySection) {
       const lines = entitySection[1].split('\n').filter(l => l.trim().startsWith('-'))
       result.entities = lines.map(l => {
@@ -910,7 +910,7 @@ const parseQuickSearch = (text) => {
   
   try {
     // Extract search query
-    const queryMatch = text.match(/Search查询:\s*(.+?)(?:\n|$)/)
+    const queryMatch = text.match(/SearchQuery:\s*(.+?)(?:\n|$)/)
     if (queryMatch) result.query = queryMatch[1].trim()
     
     // Extract result count

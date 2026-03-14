@@ -1,6 +1,6 @@
 """
-文件解析工具
-支持PDF、Markdown、TXT文件的文本提取
+File parsing工具
+支持PDF、Markdown、TXTFile的文本提取
 """
 
 import os
@@ -10,7 +10,7 @@ from typing import List, Optional
 
 def _read_text_with_fallback(file_path: str) -> str:
     """
-    读取文本文件，UTF-8失败时自动探测编码。
+    读取文本File，UTF-8Failed时自动探测编码。
     
     采用多级回退策略：
     1. 首先尝试 UTF-8 解码
@@ -19,10 +19,10 @@ def _read_text_with_fallback(file_path: str) -> str:
     4. 最终使用 UTF-8 + errors='replace' 兜底
     
     Args:
-        file_path: 文件路径
+        file_path: FilePath
         
     Returns:
-        解码后的文本内容
+        解码后的文本Content
     """
     data = Path(file_path).read_bytes()
     
@@ -59,30 +59,30 @@ def _read_text_with_fallback(file_path: str) -> str:
 
 
 class FileParser:
-    """文件解析器"""
+    """File parser"""
     
     SUPPORTED_EXTENSIONS = {'.pdf', '.md', '.markdown', '.txt'}
     
     @classmethod
     def extract_text(cls, file_path: str) -> str:
         """
-        从文件中提取文本
+        从File中提取文本
         
         Args:
-            file_path: 文件路径
+            file_path: FilePath
             
         Returns:
-            提取的文本内容
+            提取的文本Content
         """
         path = Path(file_path)
         
         if not path.exists():
-            raise FileNotFoundError(f"文件不存在: {file_path}")
+            raise FileNotFoundError(f"File不存在: {file_path}")
         
         suffix = path.suffix.lower()
         
         if suffix not in cls.SUPPORTED_EXTENSIONS:
-            raise ValueError(f"不支持的文件格式: {suffix}")
+            raise ValueError(f"不支持的FileFormat: {suffix}")
         
         if suffix == '.pdf':
             return cls._extract_from_pdf(file_path)
@@ -91,7 +91,7 @@ class FileParser:
         elif suffix == '.txt':
             return cls._extract_from_txt(file_path)
         
-        raise ValueError(f"无法处理的文件格式: {suffix}")
+        raise ValueError(f"无法Process的FileFormat: {suffix}")
     
     @staticmethod
     def _extract_from_pdf(file_path: str) -> str:
@@ -123,10 +123,10 @@ class FileParser:
     @classmethod
     def extract_from_multiple(cls, file_paths: List[str]) -> str:
         """
-        从多个文件提取文本并合并
+        从多个File提取文本并合并
         
         Args:
-            file_paths: 文件路径列表
+            file_paths: FilePathList
             
         Returns:
             合并后的文本
@@ -139,7 +139,7 @@ class FileParser:
                 filename = Path(file_path).name
                 all_texts.append(f"=== 文档 {i}: {filename} ===\n{text}")
             except Exception as e:
-                all_texts.append(f"=== 文档 {i}: {file_path} (提取失败: {str(e)}) ===")
+                all_texts.append(f"=== 文档 {i}: {file_path} (提取Failed: {str(e)}) ===")
         
         return "\n\n".join(all_texts)
 
@@ -158,7 +158,7 @@ def split_text_into_chunks(
         overlap: 重叠字符数
         
     Returns:
-        文本块列表
+        文本块List
     """
     if len(text) <= chunk_size:
         return [text] if text.strip() else []
@@ -171,7 +171,7 @@ def split_text_into_chunks(
         
         # 尝试在句子边界处分割
         if end < len(text):
-            # 查找最近的句子结束符
+            # 查找最近的句子End符
             for sep in ['。', '！', '？', '.\n', '!\n', '?\n', '\n\n', '. ', '! ', '? ']:
                 last_sep = text[start:end].rfind(sep)
                 if last_sep != -1 and last_sep > chunk_size * 0.3:
@@ -182,7 +182,7 @@ def split_text_into_chunks(
         if chunk:
             chunks.append(chunk)
         
-        # 下一个块从重叠位置开始
+        # 下一个块从重叠位置Start
         start = end - overlap if end < len(text) else len(text)
     
     return chunks

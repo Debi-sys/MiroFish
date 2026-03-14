@@ -9,7 +9,7 @@ export const generateReport = (data) => {
 }
 
 /**
- * 获取Report GenerationStatus
+ * GetReport GenerationStatus
  * @param {string} reportId
  */
 export const getReportStatus = (reportId) => {
@@ -26,7 +26,7 @@ export const getAgentLog = (reportId, fromLine = 0) => {
 }
 
 /**
- * 获取控制台日志（增量）
+ * Get控制台Log（增量）
  * @param {string} reportId
  * @param {number} fromLine - Starting from which line
  */
@@ -35,7 +35,7 @@ export const getConsoleLog = (reportId, fromLine = 0) => {
 }
 
 /**
- * 获取Report Details
+ * GetReport Details
  * @param {string} reportId
  */
 export const getReport = (reportId) => {

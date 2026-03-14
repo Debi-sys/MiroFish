@@ -1,7 +1,7 @@
 """
-OASIS模拟管理器
-管理Twitter和Reddit双平台并行模拟
-使用预设脚本 + LLM智能生成配置参数
+OASISSimulation manager
+管理Twitter和Reddit双Platform并行Simulation
+使用预设脚本 + LLM智能GenerateConfigurationParameters
 """
 
 import os
@@ -22,47 +22,47 @@ logger = get_logger('mirofish.simulation')
 
 
 class SimulationStatus(str, Enum):
-    """模拟状态"""
+    """SimulationStatus"""
     CREATED = "created"
     PREPARING = "preparing"
     READY = "ready"
     RUNNING = "running"
     PAUSED = "paused"
-    STOPPED = "stopped"      # 模拟被手动停止
-    COMPLETED = "completed"  # 模拟自然完成
+    STOPPED = "stopped"      # Simulation被手动Stop
+    COMPLETED = "completed"  # Simulation自然Complete
     FAILED = "failed"
 
 
 class PlatformType(str, Enum):
-    """平台类型"""
+    """PlatformType"""
     TWITTER = "twitter"
     REDDIT = "reddit"
 
 
 @dataclass
 class SimulationState:
-    """模拟状态"""
+    """SimulationStatus"""
     simulation_id: str
     project_id: str
     graph_id: str
     
-    # 平台启用状态
+    # Platform启用Status
     enable_twitter: bool = True
     enable_reddit: bool = True
     
-    # 状态
+    # Status
     status: SimulationStatus = SimulationStatus.CREATED
     
-    # 准备阶段数据
+    # 准备阶段Data
     entities_count: int = 0
     profiles_count: int = 0
     entity_types: List[str] = field(default_factory=list)
     
-    # 配置生成信息
+    # ConfigurationGenerateInformation
     config_generated: bool = False
     config_reasoning: str = ""
     
-    # 运行时数据
+    # Run时Data
     current_round: int = 0
     twitter_status: str = "not_started"
     reddit_status: str = "not_started"
@@ -71,11 +71,11 @@ class SimulationState:
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
     updated_at: str = field(default_factory=lambda: datetime.now().isoformat())
     
-    # 错误信息
+    # ErrorInformation
     error: Optional[str] = None
     
     def to_dict(self) -> Dict[str, Any]:
-        """完整状态字典（内部使用）"""
+        """完整Status字典（内部使用）"""
         return {
             "simulation_id": self.simulation_id,
             "project_id": self.project_id,
@@ -97,7 +97,7 @@ class SimulationState:
         }
     
     def to_simple_dict(self) -> Dict[str, Any]:
-        """简化状态字典（API返回使用）"""
+        """简化Status字典（APIReturn使用）"""
         return {
             "simulation_id": self.simulation_id,
             "project_id": self.project_id,
@@ -113,36 +113,36 @@ class SimulationState:
 
 class SimulationManager:
     """
-    模拟管理器
+    Simulation manager
     
     核心功能：
-    1. 从Zep图谱读取实体并过滤
-    2. 生成OASIS Agent Profile
-    3. 使用LLM智能生成模拟配置参数
-    4. 准备预设脚本所需的所有文件
+    1. 从ZepGraph读取Entity并过滤
+    2. GenerateOASIS Agent Profile
+    3. 使用LLM智能GenerateSimulationConfigurationParameters
+    4. 准备预设脚本所需的所有File
     """
     
-    # 模拟数据存储目录
+    # SimulationData存储Directory
     SIMULATION_DATA_DIR = os.path.join(
         os.path.dirname(__file__), 
         '../../uploads/simulations'
     )
     
     def __init__(self):
-        # 确保目录存在
+        # 确保Directory存在
         os.makedirs(self.SIMULATION_DATA_DIR, exist_ok=True)
         
-        # 内存中的模拟状态缓存
+        # 内存中的SimulationStatusCache
         self._simulations: Dict[str, SimulationState] = {}
     
     def _get_simulation_dir(self, simulation_id: str) -> str:
-        """获取模拟数据目录"""
+        """GetSimulationDataDirectory"""
         sim_dir = os.path.join(self.SIMULATION_DATA_DIR, simulation_id)
         os.makedirs(sim_dir, exist_ok=True)
         return sim_dir
     
     def _save_simulation_state(self, state: SimulationState):
-        """保存模拟状态到文件"""
+        """SaveSimulationStatus到File"""
         sim_dir = self._get_simulation_dir(state.simulation_id)
         state_file = os.path.join(sim_dir, "state.json")
         
@@ -154,7 +154,7 @@ class SimulationManager:
         self._simulations[state.simulation_id] = state
     
     def _load_simulation_state(self, simulation_id: str) -> Optional[SimulationState]:
-        """从文件加载模拟状态"""
+        """从FileLoadSimulationStatus"""
         if simulation_id in self._simulations:
             return self._simulations[simulation_id]
         
@@ -198,13 +198,13 @@ class SimulationManager:
         enable_reddit: bool = True,
     ) -> SimulationState:
         """
-        创建新的模拟
+        Create新的Simulation
         
         Args:
-            project_id: 项目ID
-            graph_id: Zep图谱ID
-            enable_twitter: 是否启用Twitter模拟
-            enable_reddit: 是否启用Reddit模拟
+            project_id: Project ID
+            graph_id: ZepGraph ID
+            enable_twitter: Whether启用TwitterSimulation
+            enable_reddit: Whether启用RedditSimulation
             
         Returns:
             SimulationState
@@ -222,7 +222,7 @@ class SimulationManager:
         )
         
         self._save_simulation_state(state)
-        logger.info(f"创建模拟: {simulation_id}, project={project_id}, graph={graph_id}")
+        logger.info(f"CreateSimulation: {simulation_id}, project={project_id}, graph={graph_id}")
         
         return state
     
@@ -237,30 +237,30 @@ class SimulationManager:
         parallel_profile_count: int = 3
     ) -> SimulationState:
         """
-        准备模拟环境（全程自动化）
+        准备Simulation环境（全程自动化）
         
         步骤：
-        1. 从Zep图谱读取并过滤实体
-        2. 为每个实体生成OASIS Agent Profile（可选LLM增强，支持并行）
-        3. 使用LLM智能生成模拟配置参数（时间、活跃度、发言频率等）
-        4. 保存配置文件和Profile文件
-        5. 复制预设脚本到模拟目录
+        1. 从ZepGraph读取并过滤Entity
+        2. 为每个EntityGenerateOASIS Agent Profile（OptionalLLM增强，支持并行）
+        3. 使用LLM智能GenerateSimulationConfigurationParameters（时间、活跃度、发言频率等）
+        4. SaveConfigurationFile和ProfileFile
+        5. 复制预设脚本到SimulationDirectory
         
         Args:
-            simulation_id: 模拟ID
-            simulation_requirement: 模拟需求描述（用于LLM生成配置）
-            document_text: 原始文档内容（用于LLM理解背景）
-            defined_entity_types: 预定义的实体类型（可选）
-            use_llm_for_profiles: 是否使用LLM生成详细人设
-            progress_callback: 进度回调函数 (stage, progress, message)
-            parallel_profile_count: 并行生成人设的数量，默认3
+            simulation_id: SimulationID
+            simulation_requirement: Simulation需求Description（用于LLMGenerateConfiguration）
+            document_text: 原始文档Content（用于LLM理解背景）
+            defined_entity_types: 预定义的EntityType（Optional）
+            use_llm_for_profiles: Whether使用LLMGenerate详细人设
+            progress_callback: 进度回调Function (stage, progress, message)
+            parallel_profile_count: 并行Generate人设的数量，Default3
             
         Returns:
             SimulationState
         """
         state = self._load_simulation_state(simulation_id)
         if not state:
-            raise ValueError(f"模拟不存在: {simulation_id}")
+            raise ValueError(f"Simulation不存在: {simulation_id}")
         
         try:
             state.status = SimulationStatus.PREPARING
@@ -268,14 +268,14 @@ class SimulationManager:
             
             sim_dir = self._get_simulation_dir(simulation_id)
             
-            # ========== 阶段1: 读取并过滤实体 ==========
+            # ========== 阶段1: 读取并过滤Entity ==========
             if progress_callback:
-                progress_callback("reading", 0, "正在连接Zep图谱...")
+                progress_callback("reading", 0, "CurrentlyConnectionZepGraph...")
             
             reader = ZepEntityReader()
             
             if progress_callback:
-                progress_callback("reading", 30, "正在读取节点数据...")
+                progress_callback("reading", 30, "Currently读取NodeData...")
             
             filtered = reader.filter_defined_entities(
                 graph_id=state.graph_id,
@@ -289,29 +289,29 @@ class SimulationManager:
             if progress_callback:
                 progress_callback(
                     "reading", 100, 
-                    f"完成，共 {filtered.filtered_count} 个实体",
+                    f"Complete，共 {filtered.filtered_count} 个Entity",
                     current=filtered.filtered_count,
                     total=filtered.filtered_count
                 )
             
             if filtered.filtered_count == 0:
                 state.status = SimulationStatus.FAILED
-                state.error = "没有找到符合条件的实体，请检查图谱是否正确构建"
+                state.error = "没有找到符合条件的Entity，请检查GraphWhether正确构建"
                 self._save_simulation_state(state)
                 return state
             
-            # ========== 阶段2: 生成Agent Profile ==========
+            # ========== 阶段2: GenerateAgent Profile ==========
             total_entities = len(filtered.entities)
             
             if progress_callback:
                 progress_callback(
                     "generating_profiles", 0, 
-                    "开始生成...",
+                    "StartGenerate...",
                     current=0,
                     total=total_entities
                 )
             
-            # 传入graph_id以启用Zep检索功能，获取更丰富的上下文
+            # 传入graph_id以启用Zep检索功能，Get更丰富的上下文
             generator = OasisProfileGenerator(graph_id=state.graph_id)
             
             def profile_progress(current, total, msg):
@@ -325,7 +325,7 @@ class SimulationManager:
                         item_name=msg
                     )
             
-            # 设置实时保存的文件路径（优先使用 Reddit JSON 格式）
+            # Settings实时Save的FilePath（优先使用 Reddit JSON Format）
             realtime_output_path = None
             realtime_platform = "reddit"
             if state.enable_reddit:
@@ -340,19 +340,19 @@ class SimulationManager:
                 use_llm=use_llm_for_profiles,
                 progress_callback=profile_progress,
                 graph_id=state.graph_id,  # 传入graph_id用于Zep检索
-                parallel_count=parallel_profile_count,  # 并行生成数量
-                realtime_output_path=realtime_output_path,  # 实时保存路径
-                output_platform=realtime_platform  # 输出格式
+                parallel_count=parallel_profile_count,  # 并行Generate数量
+                realtime_output_path=realtime_output_path,  # 实时SavePath
+                output_platform=realtime_platform  # OutputFormat
             )
             
             state.profiles_count = len(profiles)
             
-            # 保存Profile文件（注意：Twitter使用CSV格式，Reddit使用JSON格式）
-            # Reddit 已经在生成过程中实时保存了，这里再保存一次确保完整性
+            # SaveProfileFile（Note：Twitter使用CSVFormat，Reddit使用JSONFormat）
+            # Reddit 已经在Generate过程中实时Save了，这里再Save一次确保完整性
             if progress_callback:
                 progress_callback(
                     "generating_profiles", 95, 
-                    "保存Profile文件...",
+                    "SaveProfileFile...",
                     current=total_entities,
                     total=total_entities
                 )
@@ -365,7 +365,7 @@ class SimulationManager:
                 )
             
             if state.enable_twitter:
-                # Twitter使用CSV格式！这是OASIS的要求
+                # Twitter使用CSVFormat！这是OASIS的要求
                 generator.save_profiles(
                     profiles=profiles,
                     file_path=os.path.join(sim_dir, "twitter_profiles.csv"),
@@ -375,16 +375,16 @@ class SimulationManager:
             if progress_callback:
                 progress_callback(
                     "generating_profiles", 100, 
-                    f"完成，共 {len(profiles)} 个Profile",
+                    f"Complete，共 {len(profiles)} 个Profile",
                     current=len(profiles),
                     total=len(profiles)
                 )
             
-            # ========== 阶段3: LLM智能生成模拟配置 ==========
+            # ========== 阶段3: LLM智能GenerateSimulationConfiguration ==========
             if progress_callback:
                 progress_callback(
                     "generating_config", 0, 
-                    "正在分析模拟需求...",
+                    "Currently分析Simulation需求...",
                     current=0,
                     total=3
                 )
@@ -394,7 +394,7 @@ class SimulationManager:
             if progress_callback:
                 progress_callback(
                     "generating_config", 30, 
-                    "正在调用LLM生成配置...",
+                    "CurrentlyCallLLMGenerateConfiguration...",
                     current=1,
                     total=3
                 )
@@ -413,12 +413,12 @@ class SimulationManager:
             if progress_callback:
                 progress_callback(
                     "generating_config", 70, 
-                    "正在保存配置文件...",
+                    "CurrentlySaveConfigurationFile...",
                     current=2,
                     total=3
                 )
             
-            # 保存配置文件
+            # SaveConfigurationFile
             config_path = os.path.join(sim_dir, "simulation_config.json")
             with open(config_path, 'w', encoding='utf-8') as f:
                 f.write(sim_params.to_json())
@@ -429,25 +429,25 @@ class SimulationManager:
             if progress_callback:
                 progress_callback(
                     "generating_config", 100, 
-                    "配置生成完成",
+                    "ConfigurationGenerateComplete",
                     current=3,
                     total=3
                 )
             
-            # 注意：运行脚本保留在 backend/scripts/ 目录，不再复制到模拟目录
-            # 启动模拟时，simulation_runner 会从 scripts/ 目录运行脚本
+            # Note：Run脚本保留在 backend/scripts/ Directory，不再复制到SimulationDirectory
+            # StartSimulation时，simulation_runner 会从 scripts/ DirectoryRun脚本
             
-            # 更新状态
+            # UpdateStatus
             state.status = SimulationStatus.READY
             self._save_simulation_state(state)
             
-            logger.info(f"模拟准备完成: {simulation_id}, "
+            logger.info(f"Simulation准备Complete: {simulation_id}, "
                        f"entities={state.entities_count}, profiles={state.profiles_count}")
             
             return state
             
         except Exception as e:
-            logger.error(f"模拟准备失败: {simulation_id}, error={str(e)}")
+            logger.error(f"Simulation准备Failed: {simulation_id}, error={str(e)}")
             import traceback
             logger.error(traceback.format_exc())
             state.status = SimulationStatus.FAILED
@@ -456,16 +456,16 @@ class SimulationManager:
             raise
     
     def get_simulation(self, simulation_id: str) -> Optional[SimulationState]:
-        """获取模拟状态"""
+        """Get simulation status"""
         return self._load_simulation_state(simulation_id)
     
     def list_simulations(self, project_id: Optional[str] = None) -> List[SimulationState]:
-        """列出所有模拟"""
+        """列出所有Simulation"""
         simulations = []
         
         if os.path.exists(self.SIMULATION_DATA_DIR):
             for sim_id in os.listdir(self.SIMULATION_DATA_DIR):
-                # 跳过隐藏文件（如 .DS_Store）和非目录文件
+                # 跳过隐藏File（如 .DS_Store）和非DirectoryFile
                 sim_path = os.path.join(self.SIMULATION_DATA_DIR, sim_id)
                 if sim_id.startswith('.') or not os.path.isdir(sim_path):
                     continue
@@ -478,10 +478,10 @@ class SimulationManager:
         return simulations
     
     def get_profiles(self, simulation_id: str, platform: str = "reddit") -> List[Dict[str, Any]]:
-        """获取模拟的Agent Profile"""
+        """GetSimulation的Agent Profile"""
         state = self._load_simulation_state(simulation_id)
         if not state:
-            raise ValueError(f"模拟不存在: {simulation_id}")
+            raise ValueError(f"Simulation不存在: {simulation_id}")
         
         sim_dir = self._get_simulation_dir(simulation_id)
         profile_path = os.path.join(sim_dir, f"{platform}_profiles.json")
@@ -493,7 +493,7 @@ class SimulationManager:
             return json.load(f)
     
     def get_simulation_config(self, simulation_id: str) -> Optional[Dict[str, Any]]:
-        """获取模拟配置"""
+        """Get simulation config"""
         sim_dir = self._get_simulation_dir(simulation_id)
         config_path = os.path.join(sim_dir, "simulation_config.json")
         
@@ -504,7 +504,7 @@ class SimulationManager:
             return json.load(f)
     
     def get_run_instructions(self, simulation_id: str) -> Dict[str, str]:
-        """获取运行说明"""
+        """GetRunDescription"""
         sim_dir = self._get_simulation_dir(simulation_id)
         config_path = os.path.join(sim_dir, "simulation_config.json")
         scripts_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../scripts'))
@@ -520,9 +520,9 @@ class SimulationManager:
             },
             "instructions": (
                 f"1. 激活conda环境: conda activate MiroFish\n"
-                f"2. 运行模拟 (脚本位于 {scripts_dir}):\n"
-                f"   - 单独运行Twitter: python {scripts_dir}/run_twitter_simulation.py --config {config_path}\n"
-                f"   - 单独运行Reddit: python {scripts_dir}/run_reddit_simulation.py --config {config_path}\n"
-                f"   - 并行运行双平台: python {scripts_dir}/run_parallel_simulation.py --config {config_path}"
+                f"2. RunSimulation (脚本位于 {scripts_dir}):\n"
+                f"   - 单独RunTwitter: python {scripts_dir}/run_twitter_simulation.py --config {config_path}\n"
+                f"   - 单独RunReddit: python {scripts_dir}/run_reddit_simulation.py --config {config_path}\n"
+                f"   - 并行Run双Platform: python {scripts_dir}/run_parallel_simulation.py --config {config_path}"
             )
         }

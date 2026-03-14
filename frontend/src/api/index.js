@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-// 创建axios实例
+// Create axios instance
 const service = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001',
   timeout: 300000, // 5 minute timeout (ontology generation may take a long time)
@@ -9,7 +9,7 @@ const service = axios.create({
   }
 })
 
-// 请求拦截器
+// Request interceptor
 service.interceptors.request.use(
   config => {
     return config
@@ -20,7 +20,7 @@ service.interceptors.request.use(
   }
 )
 
-// 响应拦截器（容错Retry机制）
+// Response interceptor (fault-tolerant retry mechanism)
 service.interceptors.response.use(
   response => {
     const res = response.data
@@ -36,12 +36,12 @@ service.interceptors.response.use(
   error => {
     console.error('Response error:', error)
     
-    // 处理超时
+    // Handle timeout
     if (error.code === 'ECONNABORTED' && error.message.includes('timeout')) {
       console.error('Request timeout')
     }
     
-    // 处理网络Error
+    // Handle network error
     if (error.message === 'Network Error') {
       console.error('Network error - please check your connection')
     }
@@ -50,7 +50,7 @@ service.interceptors.response.use(
   }
 )
 
-// 带Retry的请求函数
+// 带Retry的RequestFunction
 export const requestWithRetry = async (requestFn, maxRetries = 3, delay = 1000) => {
   for (let i = 0; i < maxRetries; i++) {
     try {

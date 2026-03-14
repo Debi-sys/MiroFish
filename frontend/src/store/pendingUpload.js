@@ -1,5 +1,5 @@
 /**
- * Temporarily store files pending upload和需求
+ * Temporarily store files pending uploadand requirements
  * Used for immediate redirect after clicking launch engine on home page, then making API calls on the Process page
  */
 import { reactive } from 'vue'
