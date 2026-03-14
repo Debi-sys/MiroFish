@@ -15,7 +15,7 @@
             :class="{ active: viewMode === mode }"
             @click="viewMode = mode"
           >
-            {{ { graph: 'Graph', split: '双栏', workbench: '工作台' }[mode] }}
+            {{ { graph: 'Graph', split: 'Split', workbench: 'Workbench' }[mode] }}
           </button>
         </div>
       </div>
@@ -78,7 +78,7 @@ const props = defineProps({
   reportId: String
 })
 
-// Layout State - 默认切换到工作台视角
+// Layout State - default to workbench view
 const viewMode = ref('workbench')
 
 // Data State
@@ -140,28 +140,28 @@ const toggleMaximize = (target) => {
 // --- Data Logic ---
 const loadReportData = async () => {
   try {
-    addLog(`加载ReportData: ${currentReportId.value}`)
+    addLog(`Loading report data: ${currentReportId.value}`)
     
-    // 获取 report 信息以获取 simulation_id
+    // Get report info to obtain simulation_id
     const reportRes = await getReport(currentReportId.value)
     if (reportRes.success && reportRes.data) {
       const reportData = reportRes.data
       simulationId.value = reportData.simulation_id
       
       if (simulationId.value) {
-        // 获取 simulation 信息
+        // Get simulation info
         const simRes = await getSimulation(simulationId.value)
         if (simRes.success && simRes.data) {
           const simData = simRes.data
           
-          // 获取 project 信息
+          // Get project info
           if (simData.project_id) {
             const projRes = await getProject(simData.project_id)
             if (projRes.success && projRes.data) {
               projectData.value = projRes.data
-              addLog(`Project加载Success: ${projRes.data.project_id}`)
+              addLog(`Project loaded successfully: ${projRes.data.project_id}`)
               
-              // 获取 graph Data
+              // Get graph data
               if (projRes.data.graph_id) {
                 await loadGraph(projRes.data.graph_id)
               }
@@ -170,10 +170,10 @@ const loadReportData = async () => {
         }
       }
     } else {
-      addLog(`获取Report信息Failed: ${reportRes.error || '未知Error'}`)
+      addLog(`Failed to get report info: ${reportRes.error || 'Unknown error'}`)
     }
   } catch (err) {
-    addLog(`加载异常: ${err.message}`)
+    addLog(`Loading exception: ${err.message}`)
   }
 }
 
@@ -184,10 +184,10 @@ const loadGraph = async (graphId) => {
     const res = await getGraphData(graphId)
     if (res.success) {
       graphData.value = res.data
-      addLog('GraphData加载Success')
+      addLog('Graph data loaded successfully')
     }
   } catch (err) {
-    addLog(`Graph加载Failed: ${err.message}`)
+    addLog(`Failed to load graph: ${err.message}`)
   } finally {
     graphLoading.value = false
   }
@@ -208,7 +208,7 @@ watch(() => route.params.reportId, (newId) => {
 }, { immediate: true })
 
 onMounted(() => {
-  addLog('InteractionView 初始化')
+  addLog('InteractionView initialized')
   loadReportData()
 })
 </script>

@@ -15,7 +15,7 @@
             :class="{ active: viewMode === mode }"
             @click="viewMode = mode"
           >
-            {{ { graph: 'Graph', split: '双栏', workbench: '工作台' }[mode] }}
+            {{ { graph: 'Graph', split: 'Split', workbench: 'Workbench' }[mode] }}
           </button>
         </div>
       </div>
@@ -159,11 +159,11 @@ const toggleMaximize = (target) => {
 const handleNextStep = (params = {}) => {
   if (currentStep.value < 5) {
     currentStep.value++
-    addLog(`进入 Step ${currentStep.value}: ${stepNames[currentStep.value - 1]}`)
+    addLog(`Entering Step ${currentStep.value}: ${stepNames[currentStep.value - 1]}`)
     
-    // 如果是从 Step 2 进入 Step 3，记录Simulation rounds数Configuration
+    // If transitioning from Step 2 to Step 3, log the simulation rounds configuration
     if (currentStep.value === 3 && params.maxRounds) {
-      addLog(`自定义Simulation rounds数: ${params.maxRounds}  rounds`)
+      addLog(`Custom simulation rounds: ${params.maxRounds} rounds`)
     }
   }
 }
