@@ -1,5 +1,5 @@
 """
-文本处理服务
+Text processingService
 """
 
 from typing import List, Optional
@@ -7,11 +7,11 @@ from ..utils.file_parser import FileParser, split_text_into_chunks
 
 
 class TextProcessor:
-    """文本处理器"""
+    """Text processor"""
     
     @staticmethod
     def extract_from_files(file_paths: List[str]) -> str:
-        """从多个文件提取文本"""
+        """从多个File提取文本"""
         return FileParser.extract_from_multiple(file_paths)
     
     @staticmethod
@@ -29,14 +29,14 @@ class TextProcessor:
             overlap: 重叠大小
             
         Returns:
-            文本块列表
+            文本块List
         """
         return split_text_into_chunks(text, chunk_size, overlap)
     
     @staticmethod
     def preprocess_text(text: str) -> str:
         """
-        预处理文本
+        预Process文本
         - 移除多余空白
         - 标准化换行
         
@@ -44,7 +44,7 @@ class TextProcessor:
             text: 原始文本
             
         Returns:
-            处理后的文本
+            Process后的文本
         """
         import re
         
@@ -62,7 +62,7 @@ class TextProcessor:
     
     @staticmethod
     def get_text_stats(text: str) -> dict:
-        """获取文本统计信息"""
+        """Get文本统计Information"""
         return {
             "total_chars": len(text),
             "total_lines": text.count('\n') + 1,
