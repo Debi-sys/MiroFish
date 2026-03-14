@@ -10,21 +10,21 @@
           </div>
           <div class="step-status">
             <span v-if="currentPhase > 0" class="badge success">Completed</span>
-            <span v-else-if="currentPhase === 0" class="badge processing">生成中</span>
-            <span v-else class="badge pending">等待</span>
+            <span v-else-if="currentPhase === 0" class="badge processing">Generating</span>
+            <span v-else class="badge pending">Waiting</span>
           </div>
         </div>
         
         <div class="card-content">
           <p class="api-note">POST /api/graph/ontology/generate</p>
           <p class="description">
-            LLMAnalysis文档内容与Simulation Requirement，提取出现实种子，自动生成合适的本体结构
+            LLM analyzes document content and simulation requirements, extracts reality seeds, and automatically generates a suitable ontology structure
           </p>
 
           <!-- Loading / Progress -->
           <div v-if="currentPhase === 0 && ontologyProgress" class="progress-section">
             <div class="spinner-sm"></div>
-            <span>{{ ontologyProgress.message || '正在Analysis文档...' }}</span>
+            <span>{{ ontologyProgress.message || 'Analyzing document...' }}</span>
           </div>
 
           <!-- Detail Overlay -->
@@ -110,26 +110,26 @@
         <div class="card-header">
           <div class="step-info">
             <span class="step-num">02</span>
-            <span class="step-title">GraphRAG构建</span>
+            <span class="step-title">GraphRAG Build</span>
           </div>
           <div class="step-status">
             <span v-if="currentPhase > 1" class="badge success">Completed</span>
             <span v-else-if="currentPhase === 1" class="badge processing">{{ buildProgress?.progress || 0 }}%</span>
-            <span v-else class="badge pending">等待</span>
+            <span v-else class="badge pending">Waiting</span>
           </div>
         </div>
 
         <div class="card-content">
           <p class="api-note">POST /api/graph/build</p>
           <p class="description">
-            基于生成的本体，将文档自动分块后调用 Zep 构建知识Graph，提取实体和Relationship，并形成时序记忆与社区Summary
+            Based on the generated ontology, automatically chunks the document and calls Zep to build a knowledge graph, extracting entities and relationships, and forming temporal memory and community summaries
           </p>
           
           <!-- Stats Cards -->
           <div class="stats-grid">
             <div class="stat-card">
               <span class="stat-value">{{ graphStats.nodes }}</span>
-              <span class="stat-label">实体Node</span>
+              <span class="stat-label">Entity Nodes</span>
             </div>
             <div class="stat-card">
               <span class="stat-value">{{ graphStats.edges }}</span>
@@ -157,14 +157,14 @@
         
         <div class="card-content">
           <p class="api-note">POST /api/simulation/create</p>
-          <p class="description">Graph BuildingCompleted，请进入Next进行SimulationEnvironment Setup</p>
+          <p class="description">Graph building completed. Please proceed to the next step for simulation environment setup.</p>
           <button 
             class="action-btn" 
             :disabled="currentPhase < 2 || creatingSimulation"
             @click="handleEnterEnvSetup"
           >
             <span v-if="creatingSimulation" class="spinner-sm"></span>
-            {{ creatingSimulation ? '创建中...' : '进入Environment Setup ➝' }}
+            {{ creatingSimulation ? 'Creating...' : 'Enter Environment Setup ➝' }}
           </button>
         </div>
       </div>
@@ -208,10 +208,10 @@ const selectedOntologyItem = ref(null)
 const logContent = ref(null)
 const creatingSimulation = ref(false)
 
-// 进入Environment Setup - 创建 simulation 并跳转
+// Enter Environment Setup - create simulation and navigate
 const handleEnterEnvSetup = async () => {
   if (!props.projectData?.project_id || !props.projectData?.graph_id) {
-    console.error('缺少Project或Graph信息')
+    console.error('Missing project or graph information')
     return
   }
   
@@ -226,18 +226,18 @@ const handleEnterEnvSetup = async () => {
     })
     
     if (res.success && res.data?.simulation_id) {
-      // 跳转到 simulation 页面
+      // Navigate to simulation page
       router.push({
         name: 'Simulation',
         params: { simulationId: res.data.simulation_id }
       })
     } else {
-      console.error('创建SimulationFailed:', res.error)
-      alert('创建SimulationFailed: ' + (res.error || '未知Error'))
+      console.error('Failed to create simulation:', res.error)
+      alert('Failed to create simulation: ' + (res.error || 'Unknown error'))
     }
   } catch (err) {
-    console.error('创建Simulation异常:', err)
-    alert('创建Simulation异常: ' + err.message)
+    console.error('Simulation creation exception:', err)
+    alert('Simulation creation exception: ' + err.message)
   } finally {
     creatingSimulation.value = false
   }
